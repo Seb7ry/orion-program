@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * REST Controller for managing programs and their associated educational areas.
+ *
+ * Provides endpoints for creating, retrieving, updating, and deleting programs and educational areas.
+ */
 @RestController
 @RequestMapping("/service/program")
 public class ProgramController {
@@ -18,6 +23,14 @@ public class ProgramController {
     @Autowired
     private ProgramService programService;
 
+    /**
+     * Creates a new program.
+     *
+     * If the list of educational areas is null, it initializes it as an empty list.
+     *
+     * @param program The program object to be created.
+     * @return A {@link ResponseEntity} containing the created program or an error message.
+     */
     @PostMapping
     public ResponseEntity<?> createProgram(@RequestBody Program program) {
         try {
@@ -34,6 +47,11 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Retrieves all programs.
+     *
+     * @return A {@link ResponseEntity} containing the list of all programs or an error message.
+     */
     @GetMapping
     public ResponseEntity<List<?>> getAllPrograms() {
         try {
@@ -44,6 +62,12 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Retrieves a program by its ID.
+     *
+     * @param programId The ID of the program to retrieve.
+     * @return A {@link ResponseEntity} containing the program or an error message if not found.
+     */
     @GetMapping("/{programId}")
     public ResponseEntity<?> getProgramById(@PathVariable String programId) {
         try {
@@ -54,6 +78,13 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Updates an existing program.
+     *
+     * @param programId The ID of the program to update.
+     * @param program   The updated program object.
+     * @return A {@link ResponseEntity} containing the updated program or an error message.
+     */
     @PutMapping("/{programId}")
     public ResponseEntity<?> updateProgram(@PathVariable String programId, @RequestBody Program program) {
         try {
@@ -67,6 +98,12 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Deletes a program by its ID.
+     *
+     * @param programId The ID of the program to delete.
+     * @return A {@link ResponseEntity} with no content or an error message if not found.
+     */
     @DeleteMapping("/{programId}")
     public ResponseEntity<Void> deleteProgram(@PathVariable String programId) {
         try{
@@ -79,6 +116,13 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Creates a new educational area and associates it with a program.
+     *
+     * @param programId The ID of the program to associate the educational area with.
+     * @param area      The educational area object to be created.
+     * @return A {@link ResponseEntity} containing the updated program with the new educational area or an error message.
+     */
     @PostMapping("/{programId}/area")
     public ResponseEntity<?> createEducationalArea(@PathVariable String programId, @RequestBody EducationalArea area) {
         try {
@@ -93,7 +137,12 @@ public class ProgramController {
         }
     }
 
-
+    /**
+     * Retrieves all educational areas for a specific program.
+     *
+     * @param programId The ID of the program.
+     * @return A {@link ResponseEntity} containing the list of educational areas or an error message if the program is not found.
+     */
     @GetMapping("/{programId}/area")
     public ResponseEntity<List<?>> getEducationalArea(@PathVariable String programId) {
         try {
@@ -103,6 +152,13 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Retrieves a specific educational area by its ID within a program.
+     *
+     * @param programId The ID of the program.
+     * @param areaId    The ID of the educational area.
+     * @return A {@link ResponseEntity} containing the educational area or an error message.
+     */
     @GetMapping("/{programId}/area/{areaId}")
     public ResponseEntity<?> getEducationalAreaById(@PathVariable String programId, @PathVariable String areaId) {
         try {
@@ -112,6 +168,14 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Updates an educational area within a program.
+     *
+     * @param programId The ID of the program.
+     * @param areaId    The ID of the educational area to update.
+     * @param area      The updated educational area object.
+     * @return A {@link ResponseEntity} containing the updated educational area or an error message.
+     */
     @PutMapping("/{programId}/area/{areaId}")
     public ResponseEntity<?> updateEducationalArea(@PathVariable String programId, @PathVariable String areaId, @RequestBody EducationalArea area) {
         try{
@@ -125,6 +189,13 @@ public class ProgramController {
         }
     }
 
+    /**
+     * Deletes an educational area by its ID within a program.
+     *
+     * @param programId The ID of the program.
+     * @param areaId    The ID of the educational area to delete.
+     * @return A {@link ResponseEntity} with no content or an error message if not found.
+     */
     @DeleteMapping("/{programId}/area/{areaId}")
     public ResponseEntity<Void> deleteEducationalArea(@PathVariable String programId, @PathVariable String areaId) {
         try {

@@ -8,7 +8,7 @@ import java.util.Optional;
 
 /**
  * Interface for managing programs and their associated educational areas.
- *
+ * <p>
  * This interface defines the operations for handling the relationship between programs
  * and educational areas. Each program can have multiple educational areas, and each
  * educational area belongs to one program.
