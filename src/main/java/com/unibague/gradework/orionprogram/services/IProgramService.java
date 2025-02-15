@@ -1,4 +1,4 @@
-package com.unibague.gradework.orionprogram.interfaces;
+package com.unibague.gradework.orionprogram.services;
 
 import com.unibague.gradework.orionprogram.model.EducationalArea;
 import com.unibague.gradework.orionprogram.model.Program;
@@ -13,7 +13,7 @@ import java.util.Optional;
  * and educational areas. Each program can have multiple educational areas, and each
  * educational area belongs to one program.
  */
-public interface IProgram {
+public interface IProgramService {
 
     /**
      * Creates a new program.

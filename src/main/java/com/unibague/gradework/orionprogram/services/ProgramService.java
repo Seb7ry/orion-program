@@ -1,6 +1,5 @@
 package com.unibague.gradework.orionprogram.services;
 
-import com.unibague.gradework.orionprogram.interfaces.IProgram;
 import com.unibague.gradework.orionprogram.model.EducationalArea;
 import com.unibague.gradework.orionprogram.model.Program;
 import com.unibague.gradework.orionprogram.repository.ProgramRepository;
@@ -19,7 +18,7 @@ import java.util.UUID;
  * It interacts with the {@link ProgramRepository} for database operations.
  */
 @Service
-public class ProgramService implements IProgram
+public class ProgramService implements IProgramService
 {
     @Autowired
     private ProgramRepository programRepository;
