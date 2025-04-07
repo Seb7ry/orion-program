@@ -72,7 +72,10 @@ public class ProgramService implements IProgramService {
             program.setEducationalArea(new ArrayList<>());
         }
 
-        educationalArea.setEducationalAreaId(UUID.randomUUID().toString());
+        int areaCount = program.getEducationalArea().size() + 1;
+        String areaId = String.format("%sA%02d", programId, areaCount);
+
+        educationalArea.setEducationalAreaId(areaId);
         program.getEducationalArea().add(educationalArea);
         return programRepository.save(program);
     }
