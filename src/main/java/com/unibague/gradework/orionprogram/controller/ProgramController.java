@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.http.HttpStatus;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -50,6 +51,16 @@ public class ProgramController {
             return ResponseEntity.ok(program.get());
         } else {
             return ResponseEntity.status(404).body("Program not found with ID: " + programId);
+        }
+    }
+
+    @GetMapping("/name/{programName}")
+    public ResponseEntity<?> getProgramByName(@PathVariable String programName) {
+        Optional<Program> program = programService.getProgramByName(programName);
+        if(program.isPresent()) {
+            return ResponseEntity.ok(program.get());
+        } else {
+            return ResponseEntity.status(404).body("Program not found with name: " + programName);
         }
     }
 

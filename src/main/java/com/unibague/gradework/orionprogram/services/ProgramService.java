@@ -40,6 +40,11 @@ public class ProgramService implements IProgramService {
     }
 
     @Override
+    public Optional<Program> getProgramByName(String name) {
+        return programRepository.findByProgramName(name);
+    }
+
+    @Override
     public Program updateProgram(String programId, Program updatedProgram) {
         Program program = getProgramOrThrow(programId);
 

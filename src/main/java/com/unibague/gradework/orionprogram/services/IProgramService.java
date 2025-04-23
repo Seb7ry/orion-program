@@ -14,6 +14,8 @@ public interface IProgramService {
 
     Optional<Program> getProgramById(String programId);
 
+    Optional<Program> getProgramByName(String programName);
+
     Program updateProgram(String programId, Program program);
 
     void deleteProgram(String programId);
