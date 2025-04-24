@@ -22,9 +22,6 @@ public class ProgramService implements IProgramService {
         if (program.getProgramName() == null || program.getProgramName().isBlank()) {
             throw new IllegalArgumentException("El nombre del programa es obligatorio.");
         }
-        if (program.getEmail() == null || program.getEmail().isBlank()) {
-            throw new IllegalArgumentException("El correo del programa es obligatorio.");
-        }
 
         return programRepository.save(program);
     }

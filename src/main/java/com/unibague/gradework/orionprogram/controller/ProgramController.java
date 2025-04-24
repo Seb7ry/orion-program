@@ -27,7 +27,7 @@ public class ProgramController {
                 program.setEducationalArea(new ArrayList<>());
             }
             Program created = programService.createProgram(program);
-            return ResponseEntity.status(201).body(created);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Incorrect data: " + e.getMessage());
         } catch (Exception e) {
