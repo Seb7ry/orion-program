@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class ProgramService implements IProgramService {
     private ProgramRepository programRepository;
 
     @Override
-    public Program createProgram(Program program) {
+    public Program createProgram(@Valid Program program) {
         log.info("Creating new program: {}", program.getProgramName());
 
         // Validations
@@ -95,6 +96,12 @@ public class ProgramService implements IProgramService {
             program.setEmail(updatedProgram.getEmail());
         }
 
+        // Update image if provided
+        if (updatedProgram.getImage() != null) {
+            program.setImage(updatedProgram.getImage());
+            log.debug("Updated image for program: {}", programId);
+        }
+
         Program saved = programRepository.save(program);
         log.info("Program updated successfully: {}", programId);
         return saved;
@@ -111,7 +118,7 @@ public class ProgramService implements IProgramService {
     }
 
     @Override
-    public Program createEducationalArea(EducationalArea educationalArea, String programId) {
+    public Program createEducationalArea(@Valid EducationalArea educationalArea, String programId) {
         log.info("Creating educational area '{}' for program: {}", educationalArea.getName(), programId);
 
         // Validate educational area data
@@ -214,6 +221,17 @@ public class ProgramService implements IProgramService {
         // Update the area
         EducationalArea area = areaToUpdate.get();
         area.setName(educationalArea.getName());
+
+        // Update leader ID if provided
+        if (educationalArea.getLeaderId() != null) {
+            area.setLeaderId(educationalArea.getLeaderId());
+        }
+
+        // Update image if provided
+        if (educationalArea.getImage() != null) {
+            area.setImage(educationalArea.getImage());
+            log.debug("Updated image for educational area: {}", educationalAreaId);
+        }
 
         programRepository.save(program);
         log.info("Educational area updated successfully: {}", educationalAreaId);

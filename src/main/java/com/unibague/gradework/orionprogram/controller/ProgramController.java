@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -30,7 +31,7 @@ public class ProgramController {
      * @return ResponseEntity with created program and HTTP 201
      */
     @PostMapping
-    public ResponseEntity<Program> createProgram(@RequestBody Program program) {
+    public ResponseEntity<Program> createProgram(@Valid @RequestBody Program program) {
         log.info("Creating new program: {}", program.getProgramName());
         Program created = programService.createProgram(program);
         log.info("Program created successfully with ID: {}", created.getProgramId());
@@ -111,7 +112,7 @@ public class ProgramController {
      * @return ResponseEntity with updated program and HTTP 201
      */
     @PostMapping("/{programId}/area")
-    public ResponseEntity<Program> createEducationalArea(@PathVariable String programId, @RequestBody EducationalArea area) {
+    public ResponseEntity<Program> createEducationalArea(@PathVariable String programId, @Valid @RequestBody EducationalArea area) {
         log.info("Creating educational area '{}' for program: {}", area.getName(), programId);
         Program updated = programService.createEducationalArea(area, programId);
         log.info("Educational area created successfully for program: {}", programId);
