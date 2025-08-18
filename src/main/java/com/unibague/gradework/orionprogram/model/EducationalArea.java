@@ -20,4 +20,7 @@ public class EducationalArea {
 
     @Indexed
     private String name;
+
+    @Indexed
+    private String leaderId;
 }
