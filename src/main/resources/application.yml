@@ -22,13 +22,6 @@ spring:
     compose:
       enabled: false
 
-# Eureka Configuration (disabled)
-eureka:
-  client:
-    enabled: false
-  instance:
-    enabled: false
-
 # External Services Configuration
 orion:
   services:
@@ -48,26 +41,7 @@ logging:
     org.springframework.web: ${WEB_LOG_LEVEL:INFO}
     org.springframework.data.mongodb: ${MONGODB_LOG_LEVEL:INFO}
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
-
-# Management & Monitoring
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,env
-      base-path: /actuator
-  endpoint:
-    health:
-      show-details: always
-
-# Application Info
-info:
-  app:
-    name: ${spring.application.name}
-    description: Program Management Service for Orion Platform
-    version: 1.0.0
-    contact: gradework@unibague.edu.co
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 ---
 # ===========================================
@@ -77,11 +51,6 @@ spring:
   config:
     activate:
       on-profile: dev
-
-# Development-specific MongoDB
-orion:
-  services:
-    user-service-url: http://localhost:8092/service/user
 
 logging:
   level:
@@ -117,9 +86,6 @@ spring:
   config:
     activate:
       on-profile: prod
-
-# Production MongoDB (externalized)
-spring:
   data:
     mongodb:
       uri: ${MONGODB_PROD_URI}
