@@ -3,7 +3,9 @@ package com.unibague.gradework.orionprogram.controller;
 import com.unibague.gradework.orionprogram.exception.ProgramExceptions;
 import com.unibague.gradework.orionprogram.model.EducationalArea;
 import com.unibague.gradework.orionprogram.model.Program;
+import com.unibague.gradework.orionprogram.model.UserDTO;
 import com.unibague.gradework.orionprogram.services.IProgramService;
+import com.unibague.gradework.orionprogram.services.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,9 @@ public class ProgramController {
 
     @Autowired
     private IProgramService programService;
+
+    @Autowired
+    private IUserService userService;
 
     /**
      * Creates a new program
@@ -148,6 +153,38 @@ public class ProgramController {
         EducationalArea area = programService.getEducationalAreaById(programId, areaId)
                 .orElseThrow(() -> new ProgramExceptions.EducationalAreaNotFoundException(programId, areaId));
         return ResponseEntity.ok(area);
+    }
+
+    /**
+     * Retrieves the leader (user) of a specific educational area
+     * @param programId Program identifier
+     * @param areaId Educational area identifier
+     * @return ResponseEntity with leader user data and HTTP 200
+     * @throws ProgramExceptions.EducationalAreaNotFoundException if area not found
+     * @throws ProgramExceptions.InvalidProgramDataException if no leader assigned or leader not found
+     */
+    @GetMapping("/{programId}/area/{areaId}/leader")
+    public ResponseEntity<UserDTO> getEducationalAreaLeader(
+            @PathVariable String programId,
+            @PathVariable String areaId) {
+
+        log.debug("Retrieving leader for educational area {} in program: {}", areaId, programId);
+
+        // Get the educational area
+        EducationalArea area = programService.getEducationalAreaById(programId, areaId)
+                .orElseThrow(() -> new ProgramExceptions.EducationalAreaNotFoundException(programId, areaId));
+
+        // Check if leader is assigned
+        if (area.getLeaderId() == null || area.getLeaderId().isBlank()) {
+            throw new ProgramExceptions.InvalidProgramDataException("No leader assigned to educational area: " + areaId);
+        }
+
+        // Get leader user data from User Service
+        UserDTO leader = userService.getUserById(area.getLeaderId())
+                .orElseThrow(() -> new ProgramExceptions.InvalidProgramDataException("Leader user not found with ID: " + area.getLeaderId()));
+
+        log.debug("Found leader '{}' for educational area: {}", leader.getName(), areaId);
+        return ResponseEntity.ok(leader);
     }
 
     /**
