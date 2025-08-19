@@ -12,6 +12,16 @@ public interface IProgramService {
 
     List<Program> getPrograms();
 
+    /**
+     * Get programs with optional search
+     */
+    List<Program> getPrograms(String search);
+
+    /**
+     * Get simple program statistics
+     */
+    ProgramStatistics getProgramStatistics();
+
     Optional<Program> getProgramById(String programId);
 
     Optional<Program> getProgramByName(String programName);
@@ -29,4 +39,28 @@ public interface IProgramService {
     EducationalArea updateEducationalArea(String programId, String educationalAreaId, EducationalArea educationalArea);
 
     void deleteEducationalArea(String programId, String educationalAreaId);
+
+    /**
+     * Simple statistics class for program metrics
+     */
+    class ProgramStatistics {
+        private final long totalPrograms;
+        private final long programsWithAreas;
+        private final long programsWithoutAreas;
+        private final long totalEducationalAreas;
+
+        public ProgramStatistics(long totalPrograms, long programsWithAreas,
+                                 long programsWithoutAreas, long totalEducationalAreas) {
+            this.totalPrograms = totalPrograms;
+            this.programsWithAreas = programsWithAreas;
+            this.programsWithoutAreas = programsWithoutAreas;
+            this.totalEducationalAreas = totalEducationalAreas;
+        }
+
+        // Getters
+        public long getTotalPrograms() { return totalPrograms; }
+        public long getProgramsWithAreas() { return programsWithAreas; }
+        public long getProgramsWithoutAreas() { return programsWithoutAreas; }
+        public long getTotalEducationalAreas() { return totalEducationalAreas; }
+    }
 }

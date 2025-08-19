@@ -219,4 +219,37 @@ public class ProgramController {
         log.info("Educational area deleted successfully: {}", areaId);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Retrieves all programs with optional search
+     * @param search Optional search term for program name
+     * @return ResponseEntity with list of programs and HTTP 200
+     */
+    @GetMapping
+    public ResponseEntity<List<Program>> getAllPrograms(
+            @RequestParam(required = false) String search) {
+
+        if (search != null && !search.trim().isEmpty()) {
+            log.debug("Searching programs with term: '{}'", search);
+            List<Program> programs = programService.getPrograms(search);
+            log.debug("Found {} programs matching search", programs.size());
+            return ResponseEntity.ok(programs);
+        } else {
+            log.debug("Retrieving all programs");
+            List<Program> programs = programService.getPrograms();
+            log.debug("Found {} programs", programs.size());
+            return ResponseEntity.ok(programs);
+        }
+    }
+
+    /**
+     * Retrieves simple program statistics
+     * @return ResponseEntity with program statistics and HTTP 200
+     */
+    @GetMapping("/statistics")
+    public ResponseEntity<IProgramService.ProgramStatistics> getProgramStatistics() {
+        log.debug("Retrieving program statistics");
+        IProgramService.ProgramStatistics stats = programService.getProgramStatistics();
+        return ResponseEntity.ok(stats);
+    }
 }
