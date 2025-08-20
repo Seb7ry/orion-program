@@ -4,7 +4,7 @@
 # ===========================================
 
 # Stage 1: Build stage
-FROM openjdk:21-jdk-slim AS build
+FROM eclipse-temurin:21-jdk AS build
 
 # Install Maven
 RUN apt-get update && \
@@ -32,7 +32,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests -B
 
 # Stage 2: Runtime stage
-FROM openjdk:21-jre-slim AS runtime
+FROM eclipse-temurin:21-jre AS runtime
 
 # Create non-root user for security
 RUN groupadd -r orion && useradd -r -g orion orion
