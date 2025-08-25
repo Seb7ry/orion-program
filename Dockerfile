@@ -34,6 +34,11 @@ RUN ./mvnw clean package -DskipTests -B
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre AS runtime
 
+# Install curl for health checks
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create non-root user for security
 RUN groupadd -r orion && useradd -r -g orion orion
 
@@ -57,7 +62,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Environment variables with defaults
 ENV SPRING_PROFILES_ACTIVE=docker
 ENV SERVER_PORT=8093
-ENV MONGODB_URI=mongodb://mongo:27017/oriondb
+ENV MONGODB_URI=mongodb://orion_app:Or10n_App_D0ck3r_S3cur3_2024!@orion-mongo:27017/oriondb?authSource=oriondb
 ENV USER_SERVICE_URL=http://orion-user:8092/service/user
 
 # Run application

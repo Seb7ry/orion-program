@@ -55,7 +55,6 @@ logs/
 
 # Documentation
 *.md
-!README.md
 
 # Test files
 src/test/
