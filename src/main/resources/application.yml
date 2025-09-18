@@ -1,6 +1,5 @@
 # ===========================================
-# ORION PROGRAM SERVICE - Simplified Configuration
-# Uses centralized environment variables from .env files
+# ORION PROGRAM SERVICE - application.yml (dev/docker)
 # ===========================================
 
 server:
