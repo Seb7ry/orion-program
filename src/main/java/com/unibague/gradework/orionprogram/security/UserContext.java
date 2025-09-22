@@ -1,201 +1,124 @@
 package com.unibague.gradework.orionprogram.security;
 
-import lombok.Data;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-/**
- * Utility class for accessing user context from gateway headers
- * Provides authenticated user information to controllers and services
- */
 @Slf4j
 public class UserContext {
 
-    private static final String USER_ID_HEADER = "X-User-ID";
-    private static final String USER_ROLE_HEADER = "X-User-Role";
-    private static final String USER_PROGRAMS_HEADER = "X-User-Programs";
-    private static final String GATEWAY_VALIDATED_HEADER = "X-Gateway-Validated";
+    private static final ThreadLocal<AuthenticatedUser> CTX = new ThreadLocal<>();
 
-    /**
-     * Data class representing authenticated user information
-     */
-    @Data
-    @Builder
+    // Headers que vienen del gateway cuando hay JWT válido
+    public static final String H_USER_ID       = "X-User-ID";
+    public static final String H_USER_EMAIL    = "X-User-Email";
+    public static final String H_USER_ROLE     = "X-User-Role";
+    public static final String H_USER_PROGRAMS = "X-User-Programs";
+
+    public static final String H_INTERNAL      = "X-Internal-Request";
+    public static final String H_SERVICE_REQ   = "X-Service-Request";
+
+    // Rol del usuario de sistema
+    public static final String ROLE_ADMIN = "ADMIN";
+
+    @Getter
+    @ToString
+    @AllArgsConstructor
     public static class AuthenticatedUser {
         private String userId;
+        private String email;
         private String role;
-        private List<String> programs;
-        private boolean gatewayValidated;
+        private Set<String> programs;
 
-        /**
-         * Check if user has a specific role
-         */
-        public boolean hasRole(String role) {
-            return this.role != null && this.role.equalsIgnoreCase(role);
-        }
-
-        /**
-         * Check if user has access to a specific program
-         */
-        public boolean hasAccessToProgram(String programId) {
-            return programs != null && programs.contains(programId);
-        }
-
-        /**
-         * Check if user is an admin
-         */
         public boolean isAdmin() {
-            return hasRole("ADMIN") || hasRole("ADMINISTRATOR");
+            return ROLE_ADMIN.equalsIgnoreCase(role);
         }
 
-        /**
-         * Check if user is a coordinator
-         */
         public boolean isCoordinator() {
-            return hasRole("COORDINATOR");
+            return "COORDINATOR".equalsIgnoreCase(role);
         }
 
-        /**
-         * Check if user is a student
-         */
-        public boolean isStudent() {
-            return hasRole("STUDENT") || hasRole("ESTUDIANTE");
-        }
-
-        /**
-         * Check if user is a teacher/actor
-         */
-        public boolean isTeacher() {
-            return hasRole("TEACHER") || hasRole("DOCENTE") || hasRole("ACTOR");
+        public boolean hasAccessToProgram(String programId) {
+            if (programs == null || programs.isEmpty()) return false;
+            return programs.contains("*") || programs.contains(programId);
         }
     }
 
     /**
-     * Get current authenticated user from request headers
+     * Pobla el contexto por request.
+     * Si es interno (X-Internal-Request=true o X-Service-Request=true) y NO hay usuario,
+     * se inyecta un usuario de sistema con rol ADMIN y acceso total.
      */
+    public static void populateFrom(HttpServletRequest req) {
+        if (CTX.get() != null) return; // ya poblado
+
+        String userId = header(req, H_USER_ID);
+        String email  = header(req, H_USER_EMAIL);
+        String role   = header(req, H_USER_ROLE);
+        String progs  = header(req, H_USER_PROGRAMS);
+
+        boolean isInternal = "true".equalsIgnoreCase(header(req, H_INTERNAL))
+                || "true".equalsIgnoreCase(header(req, H_SERVICE_REQ));
+
+        if (userId == null && isInternal) {
+            AuthenticatedUser sys = new AuthenticatedUser(
+                    "system",
+                    "system@local",
+                    ROLE_ADMIN,
+                    Set.of("*")
+            );
+            CTX.set(sys);
+            log.debug("Injected SYSTEM user for internal request");
+            return;
+        }
+
+        if (userId == null) {
+            log.debug("No user ID in headers");
+            return;
+        }
+
+        Set<String> programs = new HashSet<>();
+        if (progs != null && !progs.isBlank()) {
+            Arrays.stream(progs.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isBlank())
+                    .forEach(programs::add);
+        }
+
+        AuthenticatedUser au = new AuthenticatedUser(
+                userId,
+                email,
+                role != null ? role : "",
+                programs
+        );
+        CTX.set(au);
+    }
+
     public static Optional<AuthenticatedUser> getCurrentUser() {
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            if (attributes == null) {
-                log.debug("No request attributes available");
-                return Optional.empty();
-            }
-
-            HttpServletRequest request = attributes.getRequest();
-
-            // Check if request is validated by gateway
-            String gatewayValidated = request.getHeader(GATEWAY_VALIDATED_HEADER);
-            if (!"true".equals(gatewayValidated)) {
-                log.debug("Request not validated by gateway");
-                return Optional.empty();
-            }
-
-            String userId = request.getHeader(USER_ID_HEADER);
-            String role = request.getHeader(USER_ROLE_HEADER);
-            String programsHeader = request.getHeader(USER_PROGRAMS_HEADER);
-
-            if (userId == null || userId.trim().isEmpty()) {
-                log.debug("No user ID in headers");
-                return Optional.empty();
-            }
-
-            // Parse programs list
-            List<String> programs = null;
-            if (programsHeader != null && !programsHeader.trim().isEmpty()) {
-                programs = Arrays.asList(programsHeader.split(","));
-            }
-
-            AuthenticatedUser user = AuthenticatedUser.builder()
-                    .userId(userId.trim())
-                    .role(role != null ? role.trim() : null)
-                    .programs(programs)
-                    .gatewayValidated(true)
-                    .build();
-
-            log.debug("Retrieved user context: {} ({})", user.getUserId(), user.getRole());
-            return Optional.of(user);
-
-        } catch (Exception e) {
-            log.warn("Error retrieving user context: {}", e.getMessage());
-            return Optional.empty();
-        }
+        return Optional.ofNullable(CTX.get());
     }
 
-    /**
-     * Get current user ID or throw exception if not authenticated
-     */
-    public static String getCurrentUserId() {
-        return getCurrentUser()
-                .map(AuthenticatedUser::getUserId)
-                .orElseThrow(() -> new SecurityException("No authenticated user found"));
-    }
-
-    /**
-     * Get current user role or return null if not authenticated
-     */
-    public static String getCurrentUserRole() {
-        return getCurrentUser()
-                .map(AuthenticatedUser::getRole)
-                .orElse(null);
-    }
-
-    /**
-     * Check if current user has a specific role
-     */
-    public static boolean hasRole(String role) {
-        return getCurrentUser()
-                .map(user -> user.hasRole(role))
-                .orElse(false);
-    }
-
-    /**
-     * Check if current user has access to a specific program
-     */
-    public static boolean hasAccessToProgram(String programId) {
-        return getCurrentUser()
-                .map(user -> user.hasAccessToProgram(programId))
-                .orElse(false);
-    }
-
-    /**
-     * Require authentication - throw exception if user is not authenticated
-     */
     public static AuthenticatedUser requireAuthentication() {
-        return getCurrentUser()
-                .orElseThrow(() -> new SecurityException("Authentication required"));
+        AuthenticatedUser u = CTX.get();
+        if (u == null) throw new SecurityException("Authentication required");
+        return u;
     }
 
-    /**
-     * Require specific role - throw exception if user doesn't have the role
-     */
-    public static void requireRole(String role) {
-        AuthenticatedUser user = requireAuthentication();
-        if (!user.hasRole(role)) {
-            throw new SecurityException("Role '" + role + "' required. User has role: " + user.getRole());
-        }
-    }
-
-    /**
-     * Require admin role
-     */
     public static void requireAdmin() {
-        AuthenticatedUser user = requireAuthentication();
-        if (!user.isAdmin()) {
-            throw new SecurityException("Administrator privileges required");
-        }
+        AuthenticatedUser u = requireAuthentication();
+        if (!u.isAdmin()) throw new SecurityException("Admin privileges required");
     }
 
-    /**
-     * Check if user is authenticated
-     */
-    public static boolean isAuthenticated() {
-        return getCurrentUser().isPresent();
+    public static void clear() {
+        CTX.remove();
+    }
+
+    private static String header(HttpServletRequest req, String name) {
+        String v = req.getHeader(name);
+        return (v == null || v.isBlank()) ? null : v;
     }
 }
